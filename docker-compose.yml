@@ -1,0 +1,34 @@
+version: "3"
+services:
+  baseWalletRuntime:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bm/base-wallet-runtime
+    container_name: BaseRuntime
+    restart: unless-stopped
+    volumes:
+    - ./:/var/www
+    - ./config/php/local.ini:/var/local/etc/php/conf.d/local.ini
+  baseWalletWebserver:
+    build:
+      context: .
+      dockerfile: Dockerfile_Nginx
+    image: bm/nginx
+    container_name: baseWalletWebserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./config/nginx/conf.d/:/etc/nginx/conf.d
+    depends_on:
+      - baseWalletRuntime
+  walletcron:
+    build:
+      context: .
+      dockerfile: cron.dockerfile
+    container_name: walletCron
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www
